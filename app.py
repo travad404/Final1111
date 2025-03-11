@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # Título do app
 st.title("Análise Gravimétrica de Resíduos")
@@ -11,7 +12,7 @@ if uploaded_file:
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file)
     else:
-        df = pd.read_excel(uploaded_file)
+        df = pd.read_excel(uploaded_file, engine="openpyxl")
     
     st.write("### Prévia dos dados carregados:")
     st.dataframe(df.head())
@@ -44,18 +45,24 @@ if uploaded_file:
     reducao_peso = ["Redução Peso Seco", "Redução Peso Líquido"]
     valor_energetico = ["Valor energético (MJ/ton)"]
     
+    def plot_chart(data, categories, title):
+        df_melted = data.melt(id_vars=["UF", "Unidade"], value_vars=categories, var_name="Resíduo", value_name="Quantidade")
+        fig = px.bar(df_melted, x="UF", y="Quantidade", color="Resíduo", barmode="group", facet_col="Unidade",
+                     title=title, labels={"UF": "Estado", "Quantidade": "Quantidade (ton)"})
+        st.plotly_chart(fig, use_container_width=True)
+    
     with tab1:
         st.write("### Resíduos Urbanos")
-        st.bar_chart(df_filtered[residuos_urbanos])
+        plot_chart(df_filtered, residuos_urbanos, "Distribuição de Resíduos Urbanos por UF e Unidade")
     
     with tab2:
         st.write("### Resíduos de Construção")
-        st.bar_chart(df_filtered[residuos_construcao])
+        plot_chart(df_filtered, residuos_construcao, "Distribuição de Resíduos de Construção por UF e Unidade")
     
     with tab3:
         st.write("### Redução de Peso")
-        st.bar_chart(df_filtered[reducao_peso])
+        plot_chart(df_filtered, reducao_peso, "Redução de Peso por UF e Unidade")
     
     with tab4:
         st.write("### Valor Energético")
-        st.bar_chart(df_filtered[valor_energetico])
+        plot_chart(df_filtered, valor_energetico, "Valor Energético por UF e Unidade")
