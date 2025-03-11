@@ -45,24 +45,32 @@ if uploaded_file:
     reducao_peso = ["Redução Peso Seco", "Redução Peso Líquido"]
     valor_energetico = ["Valor energético (MJ/ton)"]
     
-    def plot_chart(data, categories, title):
-        df_melted = data.melt(id_vars=["UF", "Unidade"], value_vars=categories, var_name="Resíduo", value_name="Quantidade")
-        fig = px.bar(df_melted, x="UF", y="Quantidade", color="Resíduo", barmode="group", facet_col="Unidade",
-                     title=title, labels={"UF": "Estado", "Quantidade": "Quantidade (ton)"})
+    def plot_chart(data, categories, title, unidade):
+        df_melted = data.melt(id_vars=["UF"], value_vars=categories, var_name="Resíduo", value_name="Quantidade")
+        fig = px.bar(df_melted, x="UF", y="Quantidade", color="Resíduo", barmode="group",
+                     title=f"{title} - {unidade}", labels={"UF": "Estado", "Quantidade": "Quantidade (ton)"})
         st.plotly_chart(fig, use_container_width=True)
     
     with tab1:
         st.write("### Resíduos Urbanos")
-        plot_chart(df_filtered, residuos_urbanos, "Distribuição de Resíduos Urbanos por UF e Unidade")
+        for unidade in unidades:
+            df_unit = df_filtered[df_filtered["Unidade"] == unidade]
+            plot_chart(df_unit, residuos_urbanos, "Distribuição de Resíduos Urbanos por UF", unidade)
     
     with tab2:
         st.write("### Resíduos de Construção")
-        plot_chart(df_filtered, residuos_construcao, "Distribuição de Resíduos de Construção por UF e Unidade")
+        for unidade in unidades:
+            df_unit = df_filtered[df_filtered["Unidade"] == unidade]
+            plot_chart(df_unit, residuos_construcao, "Distribuição de Resíduos de Construção por UF", unidade)
     
     with tab3:
         st.write("### Redução de Peso")
-        plot_chart(df_filtered, reducao_peso, "Redução de Peso por UF e Unidade")
+        for unidade in unidades:
+            df_unit = df_filtered[df_filtered["Unidade"] == unidade]
+            plot_chart(df_unit, reducao_peso, "Redução de Peso por UF", unidade)
     
     with tab4:
         st.write("### Valor Energético")
-        plot_chart(df_filtered, valor_energetico, "Valor Energético por UF e Unidade")
+        for unidade in unidades:
+            df_unit = df_filtered[df_filtered["Unidade"] == unidade]
+            plot_chart(df_unit, valor_energetico, "Valor Energético por UF", unidade)
